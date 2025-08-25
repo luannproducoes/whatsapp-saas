@@ -2,10 +2,18 @@
 
 import { useWhatsAppStore } from '@/lib/store';
 import { format } from 'date-fns';
-import { Search, Archive, Users } from 'lucide-react';
+import { Search, Archive, Users, Smartphone } from 'lucide-react';
+import { getSocket } from '@/lib/socket';
 
 export default function ChatList() {
-  const { chats, selectedChat, setSelectedChat } = useWhatsAppStore();
+  const { chats, selectedChat, setSelectedChat, isConnected, isConnecting } = useWhatsAppStore();
+
+  const handleConnectWhatsApp = () => {
+    const socket = getSocket();
+    if (socket) {
+      socket.emit('initialize');
+    }
+  };
 
   return (
     <div className="w-1/3 min-w-[300px] bg-white border-r border-gray-200 flex flex-col">
@@ -30,11 +38,23 @@ export default function ChatList() {
 
       {/* Chat List */}
       <div className="flex-1 overflow-y-auto">
-        {chats.length === 0 ? (
+        {!isConnected && !isConnecting ? (
+          <div className="flex flex-col items-center justify-center h-full text-gray-500">
+            <Smartphone size={48} className="mb-4" />
+            <p className="font-semibold mb-2">WhatsApp not connected</p>
+            <p className="text-sm mb-4">Click below to connect your WhatsApp</p>
+            <button
+              onClick={handleConnectWhatsApp}
+              className="bg-green-500 hover:bg-green-600 text-white font-medium px-6 py-2 rounded-lg transition-colors"
+            >
+              Connect WhatsApp
+            </button>
+          </div>
+        ) : chats.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-gray-500">
             <Users size={48} className="mb-4" />
-            <p>No chats yet</p>
-            <p className="text-sm">Connect WhatsApp to see your chats</p>
+            <p>Loading chats...</p>
+            <p className="text-sm">Please wait while we load your conversations</p>
           </div>
         ) : (
           chats.map((chat) => (

@@ -46,8 +46,6 @@ export default function ChatPage() {
     socket.on('connect', () => {
       console.log('Socket connected successfully');
       toast.success('Connected to server');
-      socket.emit('initialize');
-      setConnecting(true);
     });
     
     socket.on('connect_error', (error) => {
