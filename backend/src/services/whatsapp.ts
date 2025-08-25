@@ -172,8 +172,12 @@ export class WhatsAppManager {
       logger.info(`Loading chats for user: ${userId}`);
       const chats = await client.getChats();
       logger.info(`Found ${chats.length} chats for user: ${userId}`);
-      const formattedChats = await Promise.all(
-        chats.slice(0, 50).map(async (chat) => {
+      
+      const formattedChats = [];
+      
+      for (let i = 0; i < Math.min(chats.length, 20); i++) {
+        const chat = chats[i];
+        try {
           const contact = await chat.getContact();
           const lastMessage = chat.lastMessage;
           
@@ -200,7 +204,7 @@ export class WhatsAppManager {
             // Ignore avatar errors
           }
           
-          return {
+          formattedChats.push({
             id: chat.id._serialized,
             name: chat.name || contact.pushname || contact.number,
             avatar: avatar,
@@ -213,9 +217,11 @@ export class WhatsAppManager {
               timestamp: lastMessage.timestamp,
               fromMe: lastMessage.fromMe
             } : null
-          };
-        })
-      );
+          });
+        } catch (error) {
+          logger.error(`Error processing chat ${i} for user ${userId}:`, error);
+        }
+      }
       
       logger.info(`Emitting ${formattedChats.length} chats to user: ${userId}`);
       socket.emit('chats', formattedChats);
