@@ -44,9 +44,16 @@ export default function ChatPage() {
     const socket = initSocket(token);
     
     socket.on('connect', () => {
-      console.log('Socket connected');
+      console.log('Socket connected successfully');
+      toast.success('Connected to server');
       socket.emit('initialize');
       setConnecting(true);
+    });
+    
+    socket.on('connect_error', (error) => {
+      console.error('Socket connection error:', error.message);
+      toast.error(`Connection failed: ${error.message}`);
+      setConnecting(false);
     });
     
     socket.on('qr', (qr: string) => {

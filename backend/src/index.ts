@@ -55,21 +55,26 @@ app.get('/api/health', (req, res) => {
 // Socket.io connection
 io.use(async (socket, next) => {
   try {
+    logger.info('Socket.io authentication attempt');
     const token = socket.handshake.auth.token;
     if (!token) {
-      return next(new Error('Authentication error'));
+      logger.error('No token provided in socket auth');
+      return next(new Error('No authentication token provided'));
     }
     
     // Verify token with Supabase
     const { data: { user }, error } = await supabase.auth.getUser(token);
     if (error || !user) {
-      return next(new Error('Authentication error'));
+      logger.error('Token verification failed:', error);
+      return next(new Error('Invalid authentication token'));
     }
     
     socket.data.userId = user.id;
     socket.data.email = user.email;
+    logger.info(`Socket authenticated for user: ${user.email}`);
     next();
   } catch (err) {
+    logger.error('Socket authentication error:', err);
     next(new Error('Authentication error'));
   }
 });

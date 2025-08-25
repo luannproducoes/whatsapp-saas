@@ -4,10 +4,16 @@ let socket: Socket | null = null;
 
 export const initSocket = (token: string): Socket => {
   if (!socket) {
-    socket = io(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001', {
+    const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    socket = io(baseURL, {
+      path: '/socket.io/',
+      transports: ['websocket', 'polling'],
       auth: {
         token
-      }
+      },
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
     });
   }
   return socket;
