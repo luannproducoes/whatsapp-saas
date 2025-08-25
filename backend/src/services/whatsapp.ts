@@ -193,10 +193,17 @@ export class WhatsAppManager {
               last_message_time: lastMessage?.timestamp ? new Date(lastMessage.timestamp * 1000).toISOString() : null
             });
           
+          let avatar = null;
+          try {
+            avatar = await contact.getProfilePicUrl();
+          } catch (error) {
+            // Ignore avatar errors
+          }
+          
           return {
             id: chat.id._serialized,
             name: chat.name || contact.pushname || contact.number,
-            avatar: await contact.getProfilePicUrl(),
+            avatar: avatar,
             isGroup: chat.isGroup,
             isArchived: chat.archived,
             isMuted: chat.isMuted,
