@@ -35,7 +35,10 @@ export class WhatsAppManager {
 
     // Create new WhatsApp client
     const client = new Client({
-      authStrategy: new LocalAuth({ clientId: userId }),
+      authStrategy: new LocalAuth({ 
+        clientId: userId,
+        dataPath: `/app/.wwebjs_auth/${userId}_${Date.now()}` 
+      }),
       puppeteer: {
         headless: true,
         args: [
@@ -45,6 +48,7 @@ export class WhatsAppManager {
           '--disable-accelerated-2d-canvas',
           '--no-first-run',
           '--no-zygote',
+          '--single-process',
           '--disable-gpu'
         ]
       }
