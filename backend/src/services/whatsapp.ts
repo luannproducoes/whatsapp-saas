@@ -165,7 +165,9 @@ export class WhatsAppManager {
 
   async loadChats(userId: string, client: Client, socket: Socket) {
     try {
+      logger.info(`Loading chats for user: ${userId}`);
       const chats = await client.getChats();
+      logger.info(`Found ${chats.length} chats for user: ${userId}`);
       const formattedChats = await Promise.all(
         chats.slice(0, 50).map(async (chat) => {
           const contact = await chat.getContact();
@@ -204,6 +206,7 @@ export class WhatsAppManager {
         })
       );
       
+      logger.info(`Emitting ${formattedChats.length} chats to user: ${userId}`);
       socket.emit('chats', formattedChats);
     } catch (error) {
       logger.error(`Error loading chats for user ${userId}:`, error);
